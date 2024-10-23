@@ -1,3 +1,4 @@
+import os
 import argparse
 import pathlib
 import logging
@@ -7,6 +8,17 @@ from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
 from utils.fm_secure_features_names import FMSecureFeaturesNames
 from utils.pl_writer import PLWriter
+
+
+def get_filepaths(dir: str, extensions_filter: list[str] = []) -> list[str]:
+    """Get all filepaths of files with the given extensions from the given directory."""
+    filepaths = []
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+            if not extensions_filter or any(file.endswith(ext) for ext in extensions_filter):
+                filepath = os.path.join(root, file)
+                filepaths.append(filepath)
+    return filepaths
 
 
 def create_mapping_variables_file(mapping_names: dict[str, str], filepath: str) -> None:
@@ -24,7 +36,12 @@ def create_expressions_file(fm: FeatureModel, filepath: str) -> None:
     PLWriter(filepath, fm).transform()
 
 
-def main(fm_filepath: str) -> None:
+def transform_models(dirpath: str) -> None:
+    for fm_filepath in get_filepaths(dirpath, ['uvl']):
+        transform_model(fm_filepath)
+
+
+def transform_model(fm_filepath: str) -> None:
     path = pathlib.Path(fm_filepath)
     filename = path.stem
     dir = path.parent
@@ -49,7 +66,10 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.ERROR)
     
     parser = argparse.ArgumentParser(description='UVL2Logic: Transform feature models in UVL format to Logic format accepted by the Logic2BDD tool.')
-    parser.add_argument(metavar='fm', dest='fm_filepath', type=str, help='Input feature model (.uvl).')
+    parser.add_argument(metavar='path', dest='path', type=str, help='Input feature model (.uvl) or directory with models.')
     args = parser.parse_args()
 
-    main(args.fm_filepath)
+    if os.path.isdir(args.path):
+        transform_models(args.path)
+    else:
+        transform_model(args.path)
