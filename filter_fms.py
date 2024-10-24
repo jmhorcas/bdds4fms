@@ -23,30 +23,22 @@ def get_filepaths(dir: str, extensions_filter: list[str] = []) -> list[str]:
 
 
 def filter_models(dirpath: str) -> None:
-    models: dict[int, int] = defaultdict(int)
+    total_models = 0
     models_with_errors = []
     for i, fm_filepath in enumerate(get_filepaths(dirpath, ['uvl'])):
         print(f'{i}: {fm_filepath}', end='', flush=True)
         path = pathlib.Path(fm_filepath)
         filename = path.stem
-
         try:
             fm = UVLReader(fm_filepath).transform()
-            hash_fm = hash(fm)
-            models[hash_fm] += 1
-            if models[hash_fm] <= 1:
-                new_filepath = str(OUTPUT_PATH / f'{filename}.uvl')
-                UVLWriter(new_filepath, fm).transform()
-                print()
-            else:
-                print('...duplicate')
+            new_filepath = str(OUTPUT_PATH / f'{filename}.uvl')
+            UVLWriter(new_filepath, fm).transform()
+            print()
+            total_models += 1
         except FlamaException:
             print('...syntax error.')
             models_with_errors.append(fm_filepath)
-    total_models = sum(models.values())
     print(f'{total_models} total models.')
-    print(f'{len(models)} unique models.')
-    print(f'{total_models - len(models)} duplicate models.')
     print(f'{len(models_with_errors)} models with errors:')
     for i, fm_filepath in enumerate(models_with_errors):
         print(f'|-{i}: {fm_filepath}')
