@@ -3,6 +3,7 @@ import argparse
 import pathlib
 import logging
 
+from flamapy.core.exceptions import FlamaException
 from flamapy.metamodels.fm_metamodel.models import FeatureModel
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
@@ -37,8 +38,20 @@ def create_expressions_file(fm: FeatureModel, filepath: str) -> None:
 
 
 def transform_models(dirpath: str) -> None:
+    total_models = 0
+    models_with_errors = []
     for fm_filepath in get_filepaths(dirpath, ['uvl']):
-        transform_model(fm_filepath)
+        try:
+            transform_model(fm_filepath)
+            total_models += 1
+        except FlamaException:
+            print('...syntax error.')
+            models_with_errors.append(fm_filepath)
+
+    print(f'{total_models} total models.')
+    print(f'{len(models_with_errors)} models with errors:')
+    for i, fm_filepath in enumerate(models_with_errors):
+        print(f'|-{i}: {fm_filepath}')
 
 
 def transform_model(fm_filepath: str) -> None:
