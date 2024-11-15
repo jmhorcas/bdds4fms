@@ -9,17 +9,7 @@ from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
 from utils.fm_secure_features_names import FMSecureFeaturesNames
 from utils.pl_writer import PLWriter
-
-
-def get_filepaths(dir: str, extensions_filter: list[str] = []) -> list[str]:
-    """Get all filepaths of files with the given extensions from the given directory."""
-    filepaths = []
-    for root, dirs, files in os.walk(dir):
-        for file in files:
-            if not extensions_filter or any(file.endswith(ext) for ext in extensions_filter):
-                filepath = os.path.join(root, file)
-                filepaths.append(filepath)
-    return filepaths
+from utils.utils import get_filepaths
 
 
 def create_mapping_variables_file(mapping_names: dict[str, str], filepath: str) -> None:
