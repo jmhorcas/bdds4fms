@@ -104,7 +104,7 @@ def get_alternative_formula(relation: Relation) -> str:
     for child in children:
         children_negatives = children - {child}
         formula.append(f'{child} {PLWriter.LogicConnective.EQUIVALENCE.value} '
-                       f'({f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value}" + ch for ch in children_negatives)} '
+                       f'({f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value} " + ch for ch in children_negatives)} '
                            f'{PLWriter.LogicConnective.AND.value} {parent})')
     return f" {PLWriter.LogicConnective.AND.value} ".join(f'({f})' for f in formula)
 
@@ -116,11 +116,11 @@ def get_mutex_formula(relation: Relation) -> str:
     for child in children:
         children_negatives = children - {child}
         formula.append(f'{child} {PLWriter.LogicConnective.EQUIVALENCE.value} '
-                       f'({f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value}" + cn for cn in children_negatives)} '
+                       f'({f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value} " + cn for cn in children_negatives)} '
                            f'{PLWriter.LogicConnective.AND.value} {parent})')
     formula_str = f" {PLWriter.LogicConnective.AND.value} ".join(f'({f})' for f in formula)
     return f'({parent} {PLWriter.LogicConnective.EQUIVALENCE.value} ' \
-        f'{PLWriter.LogicConnective.NOT.value}({f" {PLWriter.LogicConnective.OR.value} ".join(child for child in children)})) {PLWriter.LogicConnective.OR.value} ({formula_str})'
+        f'{PLWriter.LogicConnective.NOT.value} ({f" {PLWriter.LogicConnective.OR.value} ".join(child for child in children)})) {PLWriter.LogicConnective.OR.value} ({formula_str})'
 
 
 def get_cardinality_formula(relation: Relation) -> str:
@@ -132,7 +132,7 @@ def get_cardinality_formula(relation: Relation) -> str:
         for positives in combi_k:
             negatives = children - set(positives)
             positives_and_ctc = f'{f" {PLWriter.LogicConnective.AND.value} ".join(positives)}'
-            negatives_and_ctc = f'{f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value}" + f for f in negatives)}'
+            negatives_and_ctc = f'{f" {PLWriter.LogicConnective.AND.value} ".join(f"{PLWriter.LogicConnective.NOT.value} " + f for f in negatives)}'
             if positives_and_ctc and negatives_and_ctc:
                 and_ctc = f'{positives_and_ctc} {PLWriter.LogicConnective.AND.value} {negatives_and_ctc}'
             else:
