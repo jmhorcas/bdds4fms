@@ -36,7 +36,7 @@ class PLWriter(ModelToText):
 
     def transform(self) -> str:
         expressions = to_exp(self.source_model)
-        expressions_str = '\n'.join(expressions)
+        expressions_str = '\n'.join(expressions) + '\n'
         if self.path is not None:
             with open(self.path, 'w', encoding='utf8') as file:
                 file.write(expressions_str)
