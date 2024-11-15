@@ -1,0 +1,42 @@
+JHipster
+JHipster <-> Generator
+JHipster <-> Authentication
+SocialLogin -> JHipster
+Database -> JHipster
+SpringWebSockets -> JHipster
+Libsass -> JHipster
+ClusteredSession -> JHipster
+JHipster <-> BackEnd
+InternationalizationSupport -> JHipster
+Docker -> JHipster
+JHipster <-> TestingFrameworks
+Protractor -> TestingFrameworks
+TestingFrameworks <-> Gatling
+TestingFrameworks <-> Cucumber
+(Gradle <-> (notMaven and BackEnd)) and (Maven <-> (notGradle and BackEnd))
+(SQL <-> (notCassandra and notMongoDB and Database)) and (Cassandra <-> (notSQL and notMongoDB and Database)) and (MongoDB <-> (notSQL and notCassandra and Database))
+Hibernate2ndLvlCache -> SQL
+SQL <-> Development
+SQL <-> Production
+ElasticSearch -> SQL
+(MySQL <-> (notMariaDB and notPostgreSQL and Production)) and (MariaDB <-> (notMySQL and notPostgreSQL and Production)) and (PostgreSQL <-> (notMySQL and notMariaDB and Production))
+(H2 <-> (notPostgreSQLDev and notMariaDBDev and notMySql and Development)) and (PostgreSQLDev <-> (notH2 and notMariaDBDev and notMySql and Development)) and (MariaDBDev <-> (notH2 and notPostgreSQLDev and notMySql and Development)) and (MySql <-> (notH2 and notPostgreSQLDev and notMariaDBDev and Development))
+(DiskBased <-> (notInMemory and H2)) and (InMemory <-> (notDiskBased and H2))
+(HazelCast <-> (notEhCache and Hibernate2ndLvlCache)) and (EhCache <-> (notHazelCast and Hibernate2ndLvlCache))
+(HTTPSession <-> (notOAuth2 and notUaa and notJWT and Authentication)) and (OAuth2 <-> (notHTTPSession and notUaa and notJWT and Authentication)) and (Uaa <-> (notHTTPSession and notOAuth2 and notJWT and Authentication)) and (JWT <-> (notHTTPSession and notOAuth2 and notUaa and Authentication))
+(Server <-> (notApplication and Generator)) and (Application <-> (notServer and Generator))
+(MicroserviceGateway <-> (notMonolithic and Application)) and (Monolithic <-> (notMicroserviceGateway and Application))
+(MicroserviceApplication <-> (notUaaServer and Server)) and (UaaServer <-> (notMicroserviceApplication and Server))
+((OAuth2 and not SocialLogin) and not MicroserviceApplication) -> (SQL or MongoDB)
+SocialLogin -> (((HTTPSession or JWT) and Monolithic) and (SQL or MongoDB))
+UaaServer -> Uaa
+((not OAuth2 and not SocialLogin) and not MicroserviceApplication) -> ((SQL or MongoDB) or Cassandra)
+Server -> not Protractor
+not Server -> Protractor
+MySQL -> (H2 or MySql)
+(MicroserviceApplication or MicroserviceGateway) -> (JWT or Uaa)
+Monolithic -> ((JWT or HTTPSession) or OAuth2)
+MariaDB -> (H2 or MariaDBDev)
+PostgreSQL -> (H2 or PostgreSQLDev)
+(SpringWebSockets or ClusteredSession) -> Application
+Libsass -> Application
