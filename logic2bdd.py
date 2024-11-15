@@ -27,11 +27,11 @@ def get_initial_order(varfile: str, expfile: str) -> str:
     outputfile = str(dir / f'{filename}-sifting.var')
 
     command = ['fastOrder', '-nosubexp', '-sifting', varfile, expfile, outputfile]  # These options are fine for models without numerical constraints
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    #process.wait()
-    stdout, stderr = process.communicate()
-    print(f'OUT: {stdout}')
-    print(f'ERR: {stderr}')
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process.wait()
+    #stdout, stderr = process.communicate()
+    #print(f'OUT: {stdout}')
+    #print(f'ERR: {stderr}')
     return outputfile
 
 
@@ -42,12 +42,12 @@ def build_bdd(varfile: str, expfile: str, orderfile: str, timeout: int = TIMEOUT
     dir = path.parent
     outputfile = str(dir / f'{filename}.dddmp')
 
-    command = [timeout, TIMEOUT, 'Logic2BDD', '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', MIN_NODES, '-score', orderfile, varfile, expfile]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    #process.wait()
-    stdout, stderr = process.communicate()
-    print(f'OUT: {stdout}')
-    print(f'ERR: {stderr}')
+    command = ['timeout', str(timeout), 'Logic2BDD', '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', str(MIN_NODES), '-score', orderfile, varfile, expfile]
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process.wait()
+    #stdout, stderr = process.communicate()
+    #print(f'OUT: {stdout}')
+    #print(f'ERR: {stderr}')
     return outputfile
 
 
@@ -88,7 +88,7 @@ def build_models(dirpath: str) -> None:
 def build_model(varfile: str, expfile: str) -> None:
     orderfile = get_initial_order(varfile, expfile)
     bddfile = build_bdd(varfile, expfile, orderfile)
-    print('BDD file: {bddfile}')
+    #print(f'BDD file: {bddfile}')
 
 
 if __name__ == '__main__':
