@@ -1,21 +1,24 @@
 import os
+import re
 import argparse
 import pathlib
 import logging
 import subprocess
 
-from flamapy.core.exceptions import FlamaException
-from flamapy.metamodels.fm_metamodel.models import FeatureModel
-from flamapy.metamodels.fm_metamodel.transformations import UVLReader
-
-from utils.fm_secure_features_names import FMSecureFeaturesNames
-from utils.pl_writer import PLWriter
 from utils.utils import get_filepaths
+
+
+class BDDException(Exception):
+    pass
 
 
 MIN_NODES = 200000
 CONSTRAINT_REORDER = 'minspan'
 TIMEOUT = 7200  # in seconds, 2 hours
+
+# Executables
+FASTORDER = '../bdds/bin/fastOrder'
+LOGIC2BDD = '../bdds/bin/Logic2BDD'
 
 
 def get_initial_order(varfile: str, expfile: str) -> str:
@@ -26,7 +29,7 @@ def get_initial_order(varfile: str, expfile: str) -> str:
     dir = path.parent
     outputfile = str(dir / f'{filename}-sifting.var')
 
-    command = ['fastOrder', '-nosubexp', '-sifting', varfile, expfile, outputfile]  # These options are fine for models without numerical constraints
+    command = [FASTORDER, '-nosubexp', '-sifting', varfile, expfile, outputfile]  # These options are fine for models without numerical constraints
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     process.wait()
     #stdout, stderr = process.communicate()
@@ -42,10 +45,13 @@ def build_bdd(varfile: str, expfile: str, orderfile: str, timeout: int = TIMEOUT
     dir = path.parent
     outputfile = str(dir / f'{filename}.dddmp')
 
-    command = ['timeout', str(timeout), 'Logic2BDD', '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', str(MIN_NODES), '-score', orderfile, varfile, expfile]
+    command = ['timeout', str(timeout), LOGIC2BDD, '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', str(MIN_NODES), '-score', orderfile, varfile, expfile]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    process.wait()
-    #stdout, stderr = process.communicate()
+    stdout, stderr = process.communicate()
+    s = stdout.strip().splitlines()[-1]
+    match = re.search(r'\d+ ms', s)
+    time = match.group(0) if match else None
+    print(f'|- Time: {time}')
     #print(f'OUT: {stdout}')
     #print(f'ERR: {stderr}')
     return outputfile
@@ -58,37 +64,37 @@ def reduce_size() -> None:
 
 def build_models(dirpath: str) -> None:
     total_models = 0
-    models_with_errors = []
-    models_with_missing_files = []
-    for varfile in get_filepaths(dirpath, ['var']):
+    models_with_errors = 0
+    models_with_missing_files = 0
+    for i, varfile in enumerate(get_filepaths(dirpath, ['var']), 1):
+        print(f'{i}: {varfile}...')
         path = pathlib.Path(varfile)
         filename = path.stem
         dir = path.parent
         expfile = str(dir / f'{filename}.exp')
         if not os.path.isfile(expfile):
-            print(f'Expression file not found for {filename}. Skipped.')
-            models_with_missing_files.append(varfile)
+            print(f'|- Expression file not found for {filename}. Skipped.')
+            models_with_missing_files += 1
         else:
             try:
                 build_model(varfile, expfile)
                 total_models += 1
-            except FlamaException:
-                print('... error.')
-                models_with_errors.append(varfile)
+            except (BDDException, Exception) as e:
+                models_with_errors += 1
+                print(f'|- bdd for {varfile} could not been generated: {e}.')
 
     print(f'{total_models} total models.')
-    print(f'{len(models_with_errors)} models with errors:')
-    for i, filepath in enumerate(models_with_errors, 1):
-        print(f'|-{i}: {filepath}')
-    print(f'{len(models_with_missing_files)} models with missing files:')
-    for i, filepath in enumerate(models_with_missing_files, 1):
-        print(f'|-{i}: {filepath}')
+    print(f'{models_with_errors} models with errors:')
+    print(f'{models_with_missing_files} models with missing files:')
 
 
 def build_model(varfile: str, expfile: str) -> None:
     orderfile = get_initial_order(varfile, expfile)
+    if not pathlib.Path(orderfile).exists():
+        raise BDDException(f'Initial order could not been generated.')
     bddfile = build_bdd(varfile, expfile, orderfile)
-    #print(f'BDD file: {bddfile}')
+    if not pathlib.Path(bddfile).exists():
+        raise BDDException(f'BDD could not been generated (possible timeout).')
 
 
 if __name__ == '__main__':

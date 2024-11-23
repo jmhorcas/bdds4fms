@@ -29,22 +29,21 @@ def create_expressions_file(fm: FeatureModel, filepath: str) -> None:
 
 def transform_models(dirpath: str) -> None:
     total_models = 0
-    models_with_errors = []
-    for fm_filepath in get_filepaths(dirpath, ['uvl']):
+    models_with_errors = 0
+    for i, fm_filepath in enumerate(get_filepaths(dirpath, ['uvl']), 1):
         try:
+            print(f'{i}: {fm_filepath}...')
             transform_model(fm_filepath)
             total_models += 1
         except FlamaException:
-            print('...syntax error.')
-            models_with_errors.append(fm_filepath)
+            models_with_errors += 1
+            print(f'|- {fm_filepath} contains syntax errors.')
 
     print(f'{total_models} total models.')
-    print(f'{len(models_with_errors)} models with errors:')
-    for i, fm_filepath in enumerate(models_with_errors):
-        print(f'|-{i}: {fm_filepath}')
-
+    print(f'{models_with_errors} ({round(models_with_errors / total_models * 100, 2)}%) models with errors.')
 
 def transform_model(fm_filepath: str) -> None:
+
     path = pathlib.Path(fm_filepath)
     filename = path.stem
     dir = path.parent

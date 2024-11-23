@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "/home/horcas/bdds4fms/logic2bdd.py", line 102, in <module>
+    build_models(args.dirpath)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/horcas/bdds4fms/logic2bdd.py", line 74, in build_models
+    build_model(varfile, expfile)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/horcas/bdds4fms/logic2bdd.py", line 86, in build_model
+    orderfile = get_initial_order(varfile, expfile)
+  File "/home/horcas/bdds4fms/logic2bdd.py", line 30, in get_initial_order
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+  File "/home/horcas/.localpython/lib/python3.13/subprocess.py", line 1036, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/horcas/.localpython/lib/python3.13/subprocess.py", line 1966, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'fastOrder'
