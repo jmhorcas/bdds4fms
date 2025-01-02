@@ -1,0 +1,41 @@
+.ver DDDMP-3.0
+.mode A
+.varinfo 1
+.dd models/examples/bdd/icecream_full.dddmp
+.nnodes 25
+.nvars 21
+.nsuppvars 17
+.varnames Ice_Cream Category Popsicle Scoop Flavors Lemon Vanilla Chocolate White Dark Container Stick Cup Cone Waffle Name_of_customer Scoops Jose_Miguel _Name_ _00Name _000
+.suppvarnames Ice_Cream Category Popsicle Scoop Flavors Lemon Vanilla Chocolate White Dark Container Stick Cup Cone Name_of_customer Jose_Miguel _00Name
+.orderedvarnames Ice_Cream Category Flavors Lemon Vanilla Chocolate White Dark Stick Popsicle Scoop Cup Cone Container Waffle Scoops Name_of_customer Jose_Miguel _Name_ _00Name _000
+.ids 0 1 2 3 4 5 6 7 8 9 10 11 12 13 15 17 19
+.permids 0 1 9 10 2 3 4 5 6 7 13 8 11 12 16 17 19
+.nroots 1
+.rootids -25
+.nodes
+1 T 1 0 0
+2 19 16 1 -1
+3 17 15 2 -1
+4 16 14 3 -1
+5 13 13 4 -1
+6 12 12 1 -5
+7 11 11 1 6
+8 10 10 1 7
+9 9 9 8 1
+10 12 12 5 -1
+11 11 11 6 -10
+12 10 10 11 1
+13 9 9 1 12
+14 8 8 9 13
+15 7 7 1 14
+16 7 7 14 1
+17 6 6 15 16
+18 6 6 1 15
+19 5 5 17 18
+20 5 5 17 1
+21 4 4 19 20
+22 3 3 19 21
+23 2 2 22 1
+24 1 1 23 1
+25 0 0 24 1
+.end

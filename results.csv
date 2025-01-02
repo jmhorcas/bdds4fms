@@ -1,0 +1,4 @@
+Model,Features,Constraints,UVL2Logic Time (s),Variables,Clauses,fastOrder Time (s),Logic2BDD Time (s),BDD Nodes,Configurations
+JHipster,45,13,1.5646e-06,45,42,0.0127,0.0239,152,26256
+icecream_full,21,4,1.1474e-06,21,19,0.0086,0.0222,25,528
+Pizzas,12,1,8.4378e-07,12,9,0.0077,0.0214,14,42

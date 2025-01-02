@@ -13,20 +13,20 @@ JHipster <-> TestingFrameworks
 Protractor -> TestingFrameworks
 TestingFrameworks <-> Gatling
 TestingFrameworks <-> Cucumber
-(Gradle <-> (notMaven and BackEnd)) and (Maven <-> (notGradle and BackEnd))
-(SQL <-> (notCassandra and notMongoDB and Database)) and (Cassandra <-> (notSQL and notMongoDB and Database)) and (MongoDB <-> (notSQL and notCassandra and Database))
+(Maven <-> (not Gradle and BackEnd)) and (Gradle <-> (not Maven and BackEnd))
+(Cassandra <-> (not MongoDB and not SQL and Database)) and (MongoDB <-> (not Cassandra and not SQL and Database)) and (SQL <-> (not Cassandra and not MongoDB and Database))
 Hibernate2ndLvlCache -> SQL
 SQL <-> Development
 SQL <-> Production
 ElasticSearch -> SQL
-(MySQL <-> (notMariaDB and notPostgreSQL and Production)) and (MariaDB <-> (notMySQL and notPostgreSQL and Production)) and (PostgreSQL <-> (notMySQL and notMariaDB and Production))
-(H2 <-> (notPostgreSQLDev and notMariaDBDev and notMySql and Development)) and (PostgreSQLDev <-> (notH2 and notMariaDBDev and notMySql and Development)) and (MariaDBDev <-> (notH2 and notPostgreSQLDev and notMySql and Development)) and (MySql <-> (notH2 and notPostgreSQLDev and notMariaDBDev and Development))
-(DiskBased <-> (notInMemory and H2)) and (InMemory <-> (notDiskBased and H2))
-(HazelCast <-> (notEhCache and Hibernate2ndLvlCache)) and (EhCache <-> (notHazelCast and Hibernate2ndLvlCache))
-(HTTPSession <-> (notOAuth2 and notUaa and notJWT and Authentication)) and (OAuth2 <-> (notHTTPSession and notUaa and notJWT and Authentication)) and (Uaa <-> (notHTTPSession and notOAuth2 and notJWT and Authentication)) and (JWT <-> (notHTTPSession and notOAuth2 and notUaa and Authentication))
-(Server <-> (notApplication and Generator)) and (Application <-> (notServer and Generator))
-(MicroserviceGateway <-> (notMonolithic and Application)) and (Monolithic <-> (notMicroserviceGateway and Application))
-(MicroserviceApplication <-> (notUaaServer and Server)) and (UaaServer <-> (notMicroserviceApplication and Server))
+(MariaDB <-> (not PostgreSQL and not MySQL and Production)) and (PostgreSQL <-> (not MariaDB and not MySQL and Production)) and (MySQL <-> (not MariaDB and not PostgreSQL and Production))
+(PostgreSQLDev <-> (not MariaDBDev and not MySql and not H2 and Development)) and (MariaDBDev <-> (not PostgreSQLDev and not MySql and not H2 and Development)) and (MySql <-> (not PostgreSQLDev and not MariaDBDev and not H2 and Development)) and (H2 <-> (not PostgreSQLDev and not MariaDBDev and not MySql and Development))
+(DiskBased <-> (not InMemory and H2)) and (InMemory <-> (not DiskBased and H2))
+(HazelCast <-> (not EhCache and Hibernate2ndLvlCache)) and (EhCache <-> (not HazelCast and Hibernate2ndLvlCache))
+(OAuth2 <-> (not Uaa and not JWT and not HTTPSession and Authentication)) and (Uaa <-> (not OAuth2 and not JWT and not HTTPSession and Authentication)) and (JWT <-> (not OAuth2 and not Uaa and not HTTPSession and Authentication)) and (HTTPSession <-> (not OAuth2 and not Uaa and not JWT and Authentication))
+(Application <-> (not Server and Generator)) and (Server <-> (not Application and Generator))
+(Monolithic <-> (not MicroserviceGateway and Application)) and (MicroserviceGateway <-> (not Monolithic and Application))
+(UaaServer <-> (not MicroserviceApplication and Server)) and (MicroserviceApplication <-> (not UaaServer and Server))
 ((OAuth2 and not SocialLogin) and not MicroserviceApplication) -> (SQL or MongoDB)
 SocialLogin -> (((HTTPSession or JWT) and Monolithic) and (SQL or MongoDB))
 UaaServer -> Uaa

@@ -8,7 +8,7 @@ import subprocess
 from utils.utils import get_filepaths
 
 
-#logging.basicConfig(filename='logic2bdd.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='logic2bdd.log', encoding='utf-8', level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)    
 
 
@@ -37,8 +37,6 @@ def get_initial_order(varfile: str, expfile: str, timeout: int = TIMEOUT) -> str
     logging.debug(f'Executing command: {command}')
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     process.wait()
-    if not pathlib.Path(outputfile).exists():
-        return None
     #stdout, stderr = process.communicate()
     #print(f'OUT: {stdout}')
     #print(f'ERR: {stderr}')
@@ -56,16 +54,14 @@ def build_bdd(varfile: str, expfile: str, orderfile: str, timeout: int = TIMEOUT
     logging.debug(f'Executing command: {command}')
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     stdout, stderr = process.communicate()
-    # s = stdout.strip().splitlines()[-1]
-    # if 'Time' not in s:
-    #     logging.warning(f'Timeout for files {varfile}, {expfile}, {orderfile}.')
-    #     raise BDDException('Timeout.')
-    # logging.warning(f'Time output {s}.')
-    # match = re.search(r'\d+ ms', s)
-    # time = match.group(0) if match else None
-    # logging.warning(f'Time in generating the BDD: {time}.')
-    if not pathlib.Path(outputfile).exists():
-        return None
+    s = stdout.strip().splitlines()[-1]
+    if 'Time' not in s:
+        logging.warning(f'Timeout for files {varfile}, {expfile}, {orderfile}.')
+        raise BDDException('Timeout.')
+    logging.warning(f'Time output {s}.')
+    match = re.search(r'\d+ ms', s)
+    time = match.group(0) if match else None
+    logging.warning(f'Time in generating the BDD: {time}.')
     return outputfile
 
 

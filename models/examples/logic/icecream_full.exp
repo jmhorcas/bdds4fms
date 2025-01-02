@@ -1,0 +1,19 @@
+Ice_Cream
+Ice_Cream <-> Category
+Ice_Cream <-> Flavors
+Ice_Cream <-> Container
+Waffle -> Ice_Cream
+Name_of_customer -> Ice_Cream
+Scoops -> Ice_Cream
+Jose_Miguel -> Ice_Cream
+_Name_ -> Ice_Cream
+_00Name -> Ice_Cream
+_000 -> Ice_Cream
+(Cup <-> (not Stick and not Cone and Container)) and (Stick <-> (not Cup and not Cone and Container)) and (Cone <-> (not Cup and not Stick and Container))
+Flavors <-> (Lemon or Vanilla or Chocolate)
+(Dark <-> (not White and Chocolate)) and (White <-> (not Dark and Chocolate))
+(Popsicle <-> (not Scoop and Category)) and (Scoop <-> (not Popsicle and Category))
+Popsicle -> Stick
+Scoop -> (Cup or Cone)
+(_000 -> (not _Name_ or (Jose_Miguel and Name_of_customer))) <-> _00Name
+Jose_Miguel and Name_of_customer
