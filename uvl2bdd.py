@@ -124,16 +124,22 @@ def main(fm_filepath: str) -> dict[str, Any]:
 
 def main_dir(dirpath: str) -> None:
     csv_writer = CSVWriter(CSV_FILE_RESULTS, [h.value for h in CSVHeader])
+    with open(CSV_FILE_RESULTS, 'r') as results_file:
+        content = results_file.read()
     total_models = 0
     models_filepaths = utils.get_filepaths(dirpath, ['uvl'])
     n_models = len(models_filepaths)
     LOGGER.info(f'#Models to be processed: {n_models}')
     for i, uvl_filepath in enumerate(models_filepaths, 1):
-        LOGGER.debug(f'Processing model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')
-        total_models += 1
-        csv_entry = main(uvl_filepath)
-        csv_writer.write_row(csv_entry)
-    csv_writer.close()
+        path = pathlib.Path(uvl_filepath)
+        filename = path.stem
+        if filename in content:
+            LOGGER.info(f'Skipped model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')    
+        else:
+            LOGGER.debug(f'Processing model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')
+            total_models += 1
+            csv_entry = main(uvl_filepath)
+            csv_writer.write_row(csv_entry)
     LOGGER.info(f'#Models processed: {total_models}.')
 
 
@@ -148,5 +154,4 @@ if __name__ == '__main__':
         csv_writer = CSVWriter(CSV_FILE_RESULTS, [h.value for h in CSVHeader])
         csv_entry = main(args.path)
         csv_writer.write_row(csv_entry)
-        csv_writer.close()
         

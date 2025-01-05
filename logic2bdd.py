@@ -1,9 +1,9 @@
 import os
-import re
 import argparse
 import pathlib
 import logging
 import subprocess
+from enum import Enum, auto
 
 from utils.utils import get_filepaths
 
@@ -23,6 +23,44 @@ TIMEOUT = 7200  # in seconds, 2 hours
 # Executables
 FASTORDER = '../bdds/bin/fastOrder'
 LOGIC2BDD = '../bdds/bin/Logic2BDD'
+REORDER = '../bdds/bin/reorder'
+
+
+class ReorderMethod(Enum):
+    CUDD_REORDER_SAME = auto()
+    CUDD_REORDER_RANDOM = auto()
+    CUDD_REORDER_RANDOM_PIVOT = auto()
+    CUDD_REORDER_SIFT = auto()
+    CUDD_REORDER_SIFT_CONVERGE = auto()
+    CUDD_REORDER_SYMM_SIFT = auto()
+    CUDD_REORDER_SYMM_SIFT_CONV = auto()
+    CUDD_REORDER_GROUP_SIFT = auto()
+    CUDD_REORDER_GROUP_SIFT_CONV = auto()
+    CUDD_REORDER_WINDOW2_CONV = auto()
+    CUDD_REORDER_WINDOW3_CONV = auto()
+    CUDD_REORDER_WINDOW4_CONV = auto()
+    CUDD_REORDER_ANNEALING = auto()
+    CUDD_REORDER_GENETIC = auto()
+    CUDD_REORDER_EXACT = auto()
+
+
+def reorder_bdd(bdd_file: str, method: ReorderMethod, timeout: int = TIMEOUT) -> str:
+    """Reorder a BDD to reduce the number of nodes.
+    
+    Return the new BDD file.
+    """
+    path = pathlib.Path(bdd_file)
+    filename = path.stem
+    dir = path.parent
+    outputfile = str(dir / f'{filename}-method.var')
+
+    command = ['timeout', str(timeout), REORDER, method.name, bdd_file, outputfile] 
+    logging.debug(f'Executing command: {command}')
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process.wait()
+    if not pathlib.Path(outputfile).exists():
+        return None
+    return outputfile
 
 
 def get_initial_order(varfile: str, expfile: str, timeout: int = TIMEOUT) -> str:
