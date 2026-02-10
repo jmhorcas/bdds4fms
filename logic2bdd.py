@@ -18,7 +18,8 @@ class BDDException(Exception):
 
 MIN_NODES = 200000
 CONSTRAINT_REORDER = 'minspan'
-TIMEOUT = 7200  # in seconds, 2 hours
+#CONSTRAINT_REORDER = 'smartspan'
+TIMEOUT = 3600  # in seconds, 1 hour
 
 # Executables
 FASTORDER = '../bdds/bin/fastOrder'
@@ -69,18 +70,29 @@ def get_initial_order(varfile: str, expfile: str, timeout: int = TIMEOUT) -> str
     path = pathlib.Path(varfile)
     filename = path.stem
     dir = path.parent
-    outputfile = str(dir / f'{filename}-sifting.var')
+    outputfile1 = str(dir / f'{filename}-neworder.var')
 
-    command = ['timeout', str(timeout), FASTORDER, '-nosubexp', '-sifting', varfile, expfile, outputfile]  # These options are fine for models without numerical constraints
+    # Normal setting
+    command = ['timeout', str(timeout), FASTORDER, '-nosubexp', '-sifting', varfile, expfile, outputfile1]  # These options are fine for models without numerical constraints
+    # Large FMs whose BDD cannot be build the normal setting
+    #command = ['timeout', str(timeout), FASTORDER, '-perm', '-window', '8', varfile, expfile, outputfile1]
     logging.debug(f'Executing command: {command}')
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     process.wait()
-    if not pathlib.Path(outputfile).exists():
+    if not pathlib.Path(outputfile1).exists():
         return None
+    # Sifting
+    #outputfile2 = str(dir / f'{filename}-sifting.var')
+    #command = ['timeout', str(timeout), FASTORDER, '-sifting', outputfile1, expfile, outputfile2]
+    #logging.debug(f'Executing command: {command}')
+    #process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    #process.wait()
+    #if not pathlib.Path(outputfile2).exists():
+    #    return None
     #stdout, stderr = process.communicate()
     #print(f'OUT: {stdout}')
     #print(f'ERR: {stderr}')
-    return outputfile
+    return outputfile1
 
 
 def build_bdd(varfile: str, expfile: str, orderfile: str, timeout: int = TIMEOUT) -> str:
@@ -88,9 +100,13 @@ def build_bdd(varfile: str, expfile: str, orderfile: str, timeout: int = TIMEOUT
     path = pathlib.Path(varfile)
     filename = path.stem
     dir = path.parent
+    pathlib.Path(dir.parent / 'bdd').mkdir(parents=True, exist_ok=True)
     outputfile = str(dir.parent / f'bdd/{filename}.dddmp')
 
+    # Normal settings
     command = ['timeout', str(timeout), LOGIC2BDD, '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', str(MIN_NODES), '-score', orderfile, varfile, expfile]
+    # Large FMs whose BDD cannot be build the normal setting
+    #command = ['timeout', str(timeout), LOGIC2BDD, '-out', outputfile, '-constraint-reorder', CONSTRAINT_REORDER, '-min-nodes', str(MIN_NODES), '-score', orderfile, varfile, expfile]
     logging.debug(f'Executing command: {command}')
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     stdout, stderr = process.communicate()

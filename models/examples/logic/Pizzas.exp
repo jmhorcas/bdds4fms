@@ -1,9 +1,0 @@
-Pizza
-Pizza <-> Topping
-Pizza <-> Size
-Pizza <-> Dough
-CheesyCrust -> Pizza
-(Sicilian <-> (not Neapolitan and Dough)) and (Neapolitan <-> (not Sicilian and Dough))
-(Normal <-> (not Big and Size)) and (Big <-> (not Normal and Size))
-Topping <-> (Salami or Ham or Mozzarella)
-CheesyCrust -> Big

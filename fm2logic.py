@@ -1,8 +1,7 @@
 import pathlib
 
 from flamapy.metamodels.fm_metamodel.models import FeatureModel
-
-from utils.fm_secure_features_names import FMSecureFeaturesNames
+from flamapy.metamodels.fm_metamodel.transformations import FMSecureFeaturesNames
 from utils.pl_writer import PLWriter
 
 
@@ -35,6 +34,7 @@ def fm2logic(fm_filepath: str, fm: FeatureModel) -> tuple[str, str, str]:
     mapping_names = fmsfn.mapping_names
     securevars_filepath = None
     
+    pathlib.Path(dir.parent / 'logic').mkdir(parents=True, exist_ok=True)
     if set(mapping_names.keys()) != set(mapping_names.values()):
         securevars_filepath = str(dir.parent / f'logic/{filename}.securevars')
         create_mapping_variables_file(mapping_names, securevars_filepath)

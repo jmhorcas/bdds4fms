@@ -9,18 +9,23 @@ import codetiming
 
 from flamapy.core.exceptions import FlamaException
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
+from flamapy.metamodels.fm_metamodel.operations import FMLanguageLevel, MajorLevel
 
 import fm2logic
 import logic2bdd
-from utils.csv_writer import CSVWriter
+from utils.csv_logger import CSVLogger
 from utils import utils
 
 
-logging.basicConfig(filename='uvl2bdd.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='uvl2bdd.log', 
+                    encoding='utf-8', 
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 LOGGER = logging.getLogger(__name__)    
 
-TIMEOUT = 7200  # in seconds, 2 hours
-TIMEOUT_STR = 'Timeout'
+TIMEOUT = 3600  # in seconds, 1 hour
+TIMEOUT_STR = f'Timeout ({TIMEOUT}s)'
 ERROR_STR = 'Error'
 CSV_FILE_RESULTS = 'results.csv'
 PRECISION = 4
@@ -37,6 +42,7 @@ class CSVHeader(Enum):
     LOGIC2BDD_TIME = 'Logic2BDD Time (s)'
     BDD_NODES = 'BDD Nodes'
     CONFIGURATIONS = 'Configurations'
+    INFO = 'Info'
 
 
 def main(fm_filepath: str) -> dict[str, Any]:
@@ -44,7 +50,7 @@ def main(fm_filepath: str) -> dict[str, Any]:
     filename = path.stem
 
     csv_entry = {}
-    csv_entry[CSVHeader.MODEL.value] = filename
+    csv_entry[CSVHeader.MODEL.value] = path
 
     timer = codetiming.Timer(logger=None)  # A timer to get execution time
 
@@ -58,12 +64,19 @@ def main(fm_filepath: str) -> dict[str, Any]:
     csv_entry[CSVHeader.FEATURES.value] = len(fm.get_features())
     csv_entry[CSVHeader.CONSTRAINTS.value] = len(fm.get_constraints())
 
+    # Check if the FM is a Boolean FM
+    language_level = FMLanguageLevel().execute(fm).get_result()
+    if language_level.major != MajorLevel.BOOLEAN:
+        LOGGER.warning(f'Skipped non-Boolean FM {path} (level: {language_level}).')
+        csv_entry[CSVHeader.INFO.value] = f'Skipped non-Boolean FM (level: {language_level}).'
+        return csv_entry
+
     # Convert the FM to logic
     try:
         LOGGER.debug(f'Converting FM to logic...')
         timer.start()
-        elapsed_time = timer.stop()
         var_filepath, exp_filepath, securevars_filepath = fm2logic.fm2logic(fm_filepath, fm)
+        elapsed_time = timer.stop()
     except Exception as e:
         LOGGER.error(f'Error converting FM to logic {path}: {e}')
         csv_entry[CSVHeader.UVL2LOGIC_TIME.value] = ERROR_STR
@@ -119,28 +132,34 @@ def main(fm_filepath: str) -> dict[str, Any]:
     nof_configs = utils.count_configurations(bdd_filepath)
     csv_entry[CSVHeader.CONFIGURATIONS.value] = utils.int2sci(nof_configs) if nof_configs > 1e6 else nof_configs
 
+    csv_entry[CSVHeader.INFO.value] = 'OK'
     return csv_entry
 
 
 def main_dir(dirpath: str) -> None:
-    csv_writer = CSVWriter(CSV_FILE_RESULTS, [h.value for h in CSVHeader])
+    csv_logger = CSVLogger(CSV_FILE_RESULTS, [h.value for h in CSVHeader])
     with open(CSV_FILE_RESULTS, 'r') as results_file:
-        content = results_file.read()
-    total_models = 0
+        lines = results_file.readlines()
+    processed_models = 0
+    skipped_models = 0
     models_filepaths = utils.get_filepaths(dirpath, ['uvl'])
     n_models = len(models_filepaths)
     LOGGER.info(f'#Models to be processed: {n_models}')
     for i, uvl_filepath in enumerate(models_filepaths, 1):
         path = pathlib.Path(uvl_filepath)
         filename = path.stem
-        if filename in content:
-            LOGGER.info(f'Skipped model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')    
+        # if any(filename in line and (not 'Timeout' in line or ',,' not in line) for line in lines):  # repite timeouts.
+        if any(filename in line for line in lines):  # omite timeouts.
+            LOGGER.info(f'Skipped model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')  
+            skipped_models += 1  
         else:
             LOGGER.debug(f'Processing model {uvl_filepath} ({i}/{n_models}, {round(i/n_models*100,2)}%).')
-            total_models += 1
+            processed_models += 1
             csv_entry = main(uvl_filepath)
-            csv_writer.write_row(csv_entry)
-    LOGGER.info(f'#Models processed: {total_models}.')
+            csv_logger.log(csv_entry)
+    csv_logger.close()
+    LOGGER.info(f'#Models processed: {processed_models}.')
+    LOGGER.info(f'#Models skipped: {skipped_models}.')
 
 
 if __name__ == '__main__':
@@ -151,7 +170,5 @@ if __name__ == '__main__':
     if os.path.isdir(args.path):
         main_dir(args.path)
     else:
-        csv_writer = CSVWriter(CSV_FILE_RESULTS, [h.value for h in CSVHeader])
         csv_entry = main(args.path)
-        csv_writer.write_row(csv_entry)
         
